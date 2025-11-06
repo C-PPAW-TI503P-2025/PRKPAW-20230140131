@@ -22,6 +22,7 @@ app.use((req, res, next) => {
 const presensiRoutes = require("./routes/presensi");
 const reportRoutes = require("./routes/reports");
 const ruteBuku = require("./routes/books");
+const authRoutes = require("./routes/auth");
 
 // ROUTING
 app.get("/", (req, res) => {
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 app.use("/api/books", ruteBuku);
 app.use("/api/presensi", presensiRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/auth", authRoutes);
 
 // ERROR HANDLER (contoh)
 app.use((err, req, res, next) => {
