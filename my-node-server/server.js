@@ -1,45 +1,60 @@
+// server.js
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
 const app = express();
-const PORT = 3001;
+const PORT = 3009;
 
-// Third-party middleware
+// Middleware
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(morgan("dev"));
 
-// Custom middleware logging sederhana
+// Custom logging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
   next();
 });
 
-// ROUTER IMPORT
-const presensiRoutes = require("./routes/presensi");
-const reportRoutes = require("./routes/reports");
-const ruteBuku = require("./routes/books");
+// Routes
 const authRoutes = require("./routes/auth");
+const booksRoutes = require("./routes/books");
+const presensiRoutes = require("./routes/presensi");
+const reportsRoutes = require("./routes/reports");
 
-// ROUTING
-app.get("/", (req, res) => {
-  res.send("Home Page for API");
+// ✅ Validasi: router harus berupa fungsi
+[
+  { name: "authRoutes", route: authRoutes },
+  { name: "booksRoutes", route: booksRoutes },
+  { name: "presensiRoutes", route: presensiRoutes },
+  { name: "reportsRoutes", route: reportsRoutes },
+].forEach(({ name, route }) => {
+  if (typeof route !== "function") {
+    console.error(`❌ ${name} tidak valid! Harus berupa Express Router (fungsi).`);
+    process.exit(1);
+  }
 });
-app.use("/api/books", ruteBuku);
-app.use("/api/presensi", presensiRoutes);
-app.use("/api/reports", reportRoutes);
-app.use("/api/auth", authRoutes);
 
-// ERROR HANDLER (contoh)
+// API Endpoints
+app.get("/", (req, res) => {
+  res.json({ message: "API Presensi Mahasiswa - UMY" });
+});
+app.use("/api/auth", authRoutes);
+app.use("/api/books", booksRoutes);
+app.use("/api/presensi", presensiRoutes);
+app.use("/api/reports", reportsRoutes);
+
+// Error handler
 app.use((err, req, res, next) => {
-  console.error("Terjadi error:", err.message);
+  console.error("Server error:", err);
   res.status(500).json({ message: "Terjadi kesalahan pada server." });
 });
 
-// START SERVER
+// Start server
 app.listen(PORT, () => {
-  console.log(`Express server running at http://localhost:${PORT}/`);
+  console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
 });
